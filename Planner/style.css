@@ -11,17 +11,16 @@ body {
   height: 100%;
 }
 
-.gantt-content {
+.header-row {
   display: flex;
-  min-height: 0; /* Allows flex children to shrink below their content size */
-}
-
-.gantt-content:first-child {
+  min-height: 0;
   flex: 0 0 auto; /* Header section should only take needed space */
 }
 
-.gantt-content:last-child {
-  flex: 1; /* Chart section takes remaining space */
+.main-content {
+  display: flex;
+  min-height: 0;
+  flex: 1; /* Main content takes remaining space */
 }
 
 .tasks-list-header {
@@ -34,6 +33,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  height: 25px; /* Match the timeline height for proper alignment */
 }
 
 .tasks-list-placeholder {
@@ -59,7 +59,6 @@ body {
 .timeline-container {
   flex: 1;
   overflow-x: hidden; /* Changed to hidden since we're controlling it via JS */
-  margin-bottom: 10px;
   border: 1px solid #ccc;
   border-left: none;
   border-bottom: none;
@@ -100,6 +99,7 @@ body {
   background-color: #f9f9f9;
   display: flex;
   flex-direction: column;
+  flex: none; /* Don't grow/shrink */
 }
 
 .task-item {
