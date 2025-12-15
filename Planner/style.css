@@ -1,0 +1,108 @@
+body {
+  font-family: sans-serif;
+  margin: 20px;
+  user-select: none;
+}
+
+.timeline {
+  display: grid;
+  grid-template-columns: repeat(666, 20px);
+  margin-bottom: 10px;
+}
+
+.timeline div {
+  border-right: 1px solid #ccc;
+  font-size: 10px;
+  text-align: center;
+}
+
+#chart {
+  position: relative;
+  border: 1px solid #444;
+  height: 300px;
+  margin-bottom: 10px;
+  background-image: 
+    repeating-linear-gradient(
+      to right,
+      transparent,
+      transparent 19px,
+      #ddd 19px,
+      #ddd 20px
+    );
+}
+
+.controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.controls input {
+  padding: 6px;
+  font-size: 14px;
+  width: 200px;
+}
+
+/* ---------- Task ---------- */
+
+.task {
+  position: absolute;
+  height: 30px;
+  background: #4caf50;
+  color: white;
+  padding: 4px;
+  padding-right: 12px;
+  box-sizing: border-box;
+  cursor: grab;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+}
+
+.task.selected {
+  outline: 3px solid #2196f3;
+  outline-offset: -3px;
+}
+
+.task-label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.resize-handle {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  background: rgba(0, 0, 0, 0.2);
+  cursor: ew-resize;
+  border-radius: 0 3px 3px 0;
+}
+
+.resize-handle:hover {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+/* ---------- Context menu ---------- */
+
+.context-menu {
+  position: absolute;
+  background: #222;
+  color: white;
+  border: 1px solid #555;
+  display: none;
+  z-index: 1000;
+  min-width: 120px;
+}
+
+.context-menu div {
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+.context-menu div:hover {
+  background: #444;
+}

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Offline Gantt</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<h2>Offline Gantt</h2>
+
+<div class="timeline" id="timeline"></div>
+<div id="chart"></div>
+
+<div class="controls">
+  <button id="addTaskBtn">Add task</button>
+  <input
+    id="taskNameInput"
+    type="text"
+    placeholder="Task name"
+    autocomplete="off"
+  >
+</div>
+
+<div id="contextMenu" class="context-menu">
+  <div id="renameTask">Rename</div>
+  <div id="deleteTask">Delete</div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

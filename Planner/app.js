@@ -1,0 +1,427 @@
+const DAY_WIDTH = 20;
+const DAYS_TOTAL = 365;
+
+const chart = document.getElementById("chart");
+const timeline = document.getElementById("timeline");
+const addTaskBtn = document.getElementById("addTaskBtn");
+const taskNameInput = document.getElementById("taskNameInput");
+
+const contextMenu = document.getElementById("contextMenu");
+const deleteTaskBtn = document.getElementById("deleteTask");
+const renameTaskBtn = document.getElementById("renameTask");
+
+let tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
+let contextTaskIndex = null;
+let selectedTaskIndex = null;
+let isDragging = false;
+let isEditing = false;
+let editingTaskIndex = null;
+
+/* ---------- Init ---------- */
+
+function initTimeline() {
+  for (let i = 1; i <= DAYS_TOTAL; i++) {
+    const d = document.createElement("div");
+    d.textContent = i;
+    timeline.appendChild(d);
+  }
+}
+
+function save() {
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+}
+
+/* ---------- Selection ---------- */
+
+function selectTask(index) {
+  if (tasks.length === 0) {
+    selectedTaskIndex = null;
+    return;
+  }
+
+  if (index < 0) index = tasks.length - 1;
+  if (index >= tasks.length) index = 0;
+
+  selectedTaskIndex = index;
+  updateSelection();
+}
+
+function updateSelection() {
+  document.querySelectorAll('.task').forEach((el, i) => {
+    if (i === selectedTaskIndex) {
+      el.classList.add('selected');
+    } else {
+      el.classList.remove('selected');
+    }
+  });
+}
+
+/* ---------- Render ---------- */
+
+function render() {
+  chart.innerHTML = "";
+
+  tasks.forEach((task, index) => {
+    const el = document.createElement("div");
+    el.className = "task";
+    
+    const taskLabel = document.createElement("span");
+    taskLabel.className = "task-label";
+    taskLabel.textContent = task.name;
+    el.appendChild(taskLabel);
+
+    if (index === selectedTaskIndex) {
+      el.classList.add("selected");
+    }
+
+    el.style.left = task.start * DAY_WIDTH + "px";
+    el.style.top = index * 40 + "px";
+    el.style.width = task.duration * DAY_WIDTH + "px";
+
+    enableInteractions(el, index);
+    enableContextMenu(el, index);
+
+    chart.appendChild(el);
+  });
+}
+
+/* ---------- Actions ---------- */
+
+function addTask() {
+  const name = taskNameInput.value.trim() || "Task " + (tasks.length + 1);
+
+  tasks.push({
+    name,
+    start: 1,
+    duration: 5
+  });
+
+  selectedTaskIndex = tasks.length - 1;
+
+  taskNameInput.value = "";
+  taskNameInput.focus();
+
+  save();
+  render();
+}
+
+/* ---------- Move + Resize ---------- */
+
+function enableInteractions(el, index) {
+  // Create resize handle
+  const resizeHandle = document.createElement("div");
+  resizeHandle.className = "resize-handle";
+  el.appendChild(resizeHandle);
+
+  // Resize handle interaction
+  resizeHandle.addEventListener("mousedown", e => {
+    if (isEditing) return;
+    e.preventDefault();
+    e.stopPropagation();
+    isDragging = true;
+    
+    // Set cursor for entire document during resize
+    document.body.style.cursor = "ew-resize";
+    
+    const startX = e.clientX;
+    const originalDuration = tasks[index].duration;
+
+    function onMove(e) {
+      e.preventDefault();
+      const dx = e.clientX - startX;
+      const delta = Math.round(dx / DAY_WIDTH);
+
+      let d = originalDuration + delta;
+      d = Math.max(1, d);
+      if (tasks[index].start + d > DAYS_TOTAL)
+        d = DAYS_TOTAL - tasks[index].start;
+      tasks[index].duration = d;
+      el.style.width = d * DAY_WIDTH + "px";
+    }
+
+    function stop() {
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", stop);
+      
+      // Reset cursor
+      document.body.style.cursor = "";
+      
+      isDragging = false;
+      save();
+    }
+
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", stop);
+  });
+
+  // Move interaction
+  el.addEventListener("mousedown", e => {
+    if (e.button !== 0 || e.target === resizeHandle || isEditing) return;
+
+    e.preventDefault();
+    
+    // Select task immediately without re-rendering
+    if (selectedTaskIndex !== index) {
+      selectedTaskIndex = index;
+      updateSelection();
+    }
+
+    // Set cursor for entire document during move
+    document.body.style.cursor = "grabbing";
+
+    const startMouseX = e.clientX;
+    const startLeft = tasks[index].start * DAY_WIDTH;
+    isDragging = true;
+
+    function onMove(e) {
+      e.preventDefault();
+      const dx = e.clientX - startMouseX;
+      let newLeft = startLeft + dx;
+
+      // Calculate bounds in pixels
+      const minLeft = 0;
+      const maxLeft = (DAYS_TOTAL - tasks[index].duration) * DAY_WIDTH;
+
+      // Clamp position
+      newLeft = Math.max(minLeft, Math.min(maxLeft, newLeft));
+
+      // Update visual position immediately
+      el.style.left = newLeft + "px";
+
+      // Update data model with snapped value
+      tasks[index].start = Math.round(newLeft / DAY_WIDTH);
+    }
+
+    function stop() {
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", stop);
+      
+      // Reset cursor
+      document.body.style.cursor = "";
+      
+      // Snap to grid on release
+      const snappedStart = Math.round(tasks[index].start);
+      tasks[index].start = snappedStart;
+      el.style.left = snappedStart * DAY_WIDTH + "px";
+      
+      isDragging = false;
+      save();
+    }
+
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", stop);
+  });
+}
+
+/* ---------- Context Menu ---------- */
+
+function enableContextMenu(el, index) {
+  el.addEventListener("contextmenu", e => {
+    e.preventDefault();
+    if (!isDragging) {
+      selectedTaskIndex = index;
+      updateSelection();
+
+      contextTaskIndex = index;
+      contextMenu.style.left = e.pageX + "px";
+      contextMenu.style.top = e.pageY + "px";
+      contextMenu.style.display = "block";
+    }
+  });
+}
+
+deleteTaskBtn.addEventListener("click", () => {
+  if (contextTaskIndex !== null) {
+    tasks.splice(contextTaskIndex, 1);
+
+    if (selectedTaskIndex >= tasks.length)
+      selectedTaskIndex = tasks.length - 1;
+
+    contextTaskIndex = null;
+    save();
+    render();
+  }
+  hideContextMenu();
+});
+
+renameTaskBtn.addEventListener("click", () => {
+  if (contextTaskIndex !== null) {
+    startInlineRename(contextTaskIndex);
+    contextTaskIndex = null;
+  }
+  hideContextMenu();
+});
+
+function startInlineRename(taskIndex) {
+  isEditing = true;
+  editingTaskIndex = taskIndex;
+  
+  const taskElement = document.querySelectorAll('.task')[taskIndex];
+  const taskLabel = taskElement.querySelector('.task-label');
+  const currentName = tasks[taskIndex].name;
+  
+  // Create input element
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.value = currentName;
+  input.className = 'task-name-input';
+  input.style.cssText = `
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: inherit;
+    font-family: inherit;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    outline: none;
+    cursor: text;
+  `;
+  
+  // Replace label with input
+  taskLabel.style.display = 'none';
+  taskElement.insertBefore(input, taskLabel);
+  
+  // Focus and select text
+  input.focus();
+  input.select();
+  
+  // Handle input events
+  input.addEventListener('keydown', handleRenameKeydown);
+  input.addEventListener('blur', finishRename);
+  input.addEventListener('input', adjustInputWidth);
+  
+  // Adjust width initially
+  adjustInputWidth.call(input);
+}
+
+function handleRenameKeydown(e) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    e.stopPropagation();
+    finishRename.call(this);
+  } else if (e.key === 'Escape') {
+    e.preventDefault();
+    e.stopPropagation();
+    cancelRename.call(this);
+  }
+  // Allow arrow keys to work within the input
+  e.stopPropagation();
+}
+
+function finishRename() {
+  const input = this;
+  const newName = input.value.trim();
+  
+  if (newName && editingTaskIndex !== null) {
+    tasks[editingTaskIndex].name = newName;
+    save();
+    // Update the task label text immediately
+    const taskElement = input.closest('.task');
+    const taskLabel = taskElement.querySelector('.task-label');
+    taskLabel.textContent = newName;
+  }
+  
+  cleanupRename.call(this);
+}
+
+function cancelRename() {
+  cleanupRename.call(this);
+}
+
+function cleanupRename() {
+  const input = this;
+  const taskElement = input.closest('.task');
+  const taskLabel = taskElement.querySelector('.task-label');
+  
+  // Remove input and restore label
+  input.remove();
+  taskLabel.style.display = '';
+  
+  // Reset editing state
+  isEditing = false;
+  editingTaskIndex = null;
+}
+
+function adjustInputWidth() {
+  const input = this;
+  // Create a temporary span to measure text width
+  const span = document.createElement('span');
+  span.style.cssText = `
+    position: absolute;
+    visibility: hidden;
+    white-space: pre;
+    font-size: inherit;
+    font-family: inherit;
+    padding: 0;
+    margin: 0;
+  `;
+  span.textContent = input.value || input.placeholder;
+  document.body.appendChild(span);
+  
+  // Set input width based on text width
+  input.style.width = (span.offsetWidth + 10) + 'px';
+  
+  document.body.removeChild(span);
+}
+
+function hideContextMenu() {
+  contextMenu.style.display = "none";
+}
+
+document.addEventListener("click", hideContextMenu);
+
+/* ---------- Keyboard Navigation ---------- */
+
+document.addEventListener("keydown", e => {
+  // Don't handle keyboard shortcuts if we're editing a task name or if focus is in add task input
+  const activeElement = document.activeElement;
+  const isAddTaskInputFocused = activeElement && activeElement.id === 'taskNameInput';
+  
+  if (isEditing || isAddTaskInputFocused) return;
+  
+  if (tasks.length === 0 || selectedTaskIndex === null) return;
+
+  if (e.key === "ArrowDown") {
+    e.preventDefault();
+    selectTask(selectedTaskIndex + 1);
+  }
+
+  if (e.key === "ArrowUp") {
+    e.preventDefault();
+    selectTask(selectedTaskIndex - 1);
+  }
+
+  if (e.key === "ArrowRight") {
+    e.preventDefault();
+    let d = tasks[selectedTaskIndex].duration + 1;
+    if (tasks[selectedTaskIndex].start + d <= DAYS_TOTAL) {
+      tasks[selectedTaskIndex].duration = d;
+      save();
+      render();
+    }
+  }
+
+  if (e.key === "ArrowLeft") {
+    e.preventDefault();
+    let d = tasks[selectedTaskIndex].duration - 1;
+    if (d >= 1) {
+      tasks[selectedTaskIndex].duration = d;
+      save();
+      render();
+    }
+  }
+});
+
+/* ---------- Keyboard ---------- */
+
+taskNameInput.addEventListener("keydown", e => {
+  if (e.key === "Enter") addTask();
+});
+
+/* ---------- Boot ---------- */
+
+initTimeline();
+render();
+taskNameInput.focus();
+addTaskBtn.addEventListener("click", addTask);
