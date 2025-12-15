@@ -11,11 +11,21 @@ const deleteTaskBtn = document.getElementById("deleteTask");
 const renameTaskBtn = document.getElementById("renameTask");
 
 let tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
+
+// Ensure all existing tasks have a color property
+tasks = tasks.map(task => {
+  if (!task.color) {
+    task.color = "green"; // Default color for existing tasks
+  }
+  return task;
+});
+
 let contextTaskIndex = null;
 let selectedTaskIndex = null;
 let isDragging = false;
 let isEditing = false;
 let editingTaskIndex = null;
+let currentColor = "green"; // Default color
 
 /* ---------- Init ---------- */
 
@@ -78,6 +88,7 @@ function render() {
     el.style.top = index * 40 + "px";  // Keep the same positioning logic
     el.style.width = task.duration * DAY_WIDTH + "px";
     el.style.position = "absolute";  // Ensure position is absolute
+    el.style.backgroundColor = task.color || "green";  // Apply task color
 
     enableInteractions(el, index);
     enableContextMenu(el, index);
@@ -97,7 +108,8 @@ function addTask() {
   tasks.push({
     name,
     start: 1,
-    duration: 5
+    duration: 5,
+    color: currentColor
   });
 
   selectedTaskIndex = tasks.length - 1;
@@ -437,6 +449,55 @@ timelineContainer.addEventListener("scroll", () => {
 // Sync chart container scroll to timeline
 chartContainer.addEventListener("scroll", () => {
   timelineContainer.scrollLeft = chartContainer.scrollLeft;
+});
+
+/* ---------- Color Picker ---------- */
+
+// Add event listeners to color options
+document.querySelectorAll('.color-option').forEach(option => {
+  option.addEventListener('click', () => {
+    // Remove selected class from all options
+    document.querySelectorAll('.color-option').forEach(opt => {
+      opt.classList.remove('selected');
+    });
+    
+    // Add selected class to clicked option
+    option.classList.add('selected');
+    
+    // Update current color
+    currentColor = option.getAttribute('data-color');
+  });
+});
+
+/* ---------- Keyboard Navigation for Colors ---------- */
+
+// Handle arrow key navigation for color selection when task name input is focused
+taskNameInput.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+    e.preventDefault();
+    
+    // Get all color options
+    const colorOptions = Array.from(document.querySelectorAll('.color-option'));
+    const currentIndex = colorOptions.findIndex(option => 
+      option.classList.contains('selected')
+    );
+    
+    let newIndex;
+    if (e.key === 'ArrowRight') {
+      newIndex = (currentIndex + 1) % colorOptions.length;
+    } else if (e.key === 'ArrowLeft') {
+      newIndex = (currentIndex - 1 + colorOptions.length) % colorOptions.length;
+    }
+    
+    // Remove selected class from current option
+    colorOptions[currentIndex]?.classList.remove('selected');
+    
+    // Add selected class to new option
+    colorOptions[newIndex]?.classList.add('selected');
+    
+    // Update current color
+    currentColor = colorOptions[newIndex].getAttribute('data-color');
+  }
 });
 
 /* ---------- Boot ---------- */

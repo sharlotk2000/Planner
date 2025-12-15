@@ -25,7 +25,7 @@ body {
 .timeline {
   display: grid;
   grid-template-columns: repeat(666, 20px);
-  min-width: 100%;
+  min-width: calc(20px * 666); /* Width based on total number of days */
   position: relative;
 }
 
@@ -46,7 +46,7 @@ body {
 #chart {
   position: relative;
   min-height: 100%;
-  min-width: 100%;
+  min-width: calc(20px * 666); /* Width based on total number of days */
   background-image: 
     repeating-linear-gradient(
       to right,
@@ -67,6 +67,24 @@ body {
   padding: 6px;
   font-size: 14px;
   width: 200px;
+}
+
+.color-picker {
+  display: flex;
+  gap: 4px;
+}
+
+.color-option {
+  width: 20px;
+  height: 20px;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.color-option.selected {
+  border-color: white;
+  box-shadow: 0 0 0 2px #333;
 }
 
 /* ---------- Task ---------- */
