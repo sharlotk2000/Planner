@@ -5,6 +5,8 @@ const chart = document.getElementById("chart");
 const timeline = document.getElementById("timeline");
 const addTaskBtn = document.getElementById("addTaskBtn");
 const taskNameInput = document.getElementById("taskNameInput");
+const tasksList = document.getElementById("tasksList");
+const divider = document.getElementById("divider");
 
 const contextMenu = document.getElementById("contextMenu");
 const deleteTaskBtn = document.getElementById("deleteTask");
@@ -41,6 +43,36 @@ function save() {
   localStorage.setItem("tasks", JSON.stringify(tasks));
 }
 
+/* ---------- Divider Resizing ---------- */
+
+function setupDivider() {
+  let isResizing = false;
+  
+  divider.addEventListener('mousedown', function(e) {
+    isResizing = true;
+    document.body.style.cursor = 'col-resize';
+    e.preventDefault();
+  });
+  
+  document.addEventListener('mousemove', function(e) {
+    if (!isResizing) return;
+    
+    const ganttContent = document.querySelector('.gantt-content');
+    const tasksListEl = document.getElementById('tasksList');
+    
+    // Calculate new width for the tasks list based on the mouse position relative to the gantt content
+    const contentRect = ganttContent.getBoundingClientRect();
+    const newWidth = Math.max(150, Math.min(400, e.clientX - contentRect.left));
+    
+    tasksListEl.style.width = newWidth + 'px';
+  });
+  
+  document.addEventListener('mouseup', function() {
+    isResizing = false;
+    document.body.style.cursor = '';
+  });
+}
+
 /* ---------- Selection ---------- */
 
 function selectTask(index) {
@@ -57,7 +89,17 @@ function selectTask(index) {
 }
 
 function updateSelection() {
+  // Update selection in chart
   document.querySelectorAll('.task').forEach((el, i) => {
+    if (i === selectedTaskIndex) {
+      el.classList.add('selected');
+    } else {
+      el.classList.remove('selected');
+    }
+  });
+  
+  // Update selection in task list
+  document.querySelectorAll('.task-item').forEach((el, i) => {
     if (i === selectedTaskIndex) {
       el.classList.add('selected');
     } else {
@@ -70,8 +112,26 @@ function updateSelection() {
 
 function render() {
   chart.innerHTML = "";
+  tasksList.innerHTML = "";
 
   tasks.forEach((task, index) => {
+    // Add task to the left panel
+    const taskItem = document.createElement("div");
+    taskItem.className = "task-item";
+    taskItem.textContent = task.name;
+    taskItem.dataset.index = index;
+    
+    if (index === selectedTaskIndex) {
+      taskItem.classList.add('selected');
+    }
+    
+    taskItem.addEventListener('click', () => {
+      selectTask(index);
+    });
+    
+    tasksList.appendChild(taskItem);
+
+    // Add task to the chart
     const el = document.createElement("div");
     el.className = "task";
     
@@ -451,6 +511,16 @@ chartContainer.addEventListener("scroll", () => {
   timelineContainer.scrollLeft = chartContainer.scrollLeft;
 });
 
+// Sync vertical scrolling between task list and chart
+const tasksListContainer = document.getElementById("tasksList");
+chartContainer.addEventListener("scroll", () => {
+  tasksListContainer.scrollTop = chartContainer.scrollTop;
+});
+
+tasksListContainer.addEventListener("scroll", () => {
+  chartContainer.scrollTop = tasksListContainer.scrollTop;
+});
+
 /* ---------- Color Picker ---------- */
 
 // Add event listeners to color options
@@ -502,6 +572,7 @@ taskNameInput.addEventListener('keydown', e => {
 
 /* ---------- Boot ---------- */
 
+setupDivider();
 initTimeline();
 render();
 taskNameInput.focus();
