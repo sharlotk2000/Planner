@@ -13,14 +13,55 @@ body {
 
 .gantt-content {
   display: flex;
-  flex: 1;
-  min-height: 400px;
+  min-height: 0; /* Allows flex children to shrink below their content size */
+}
+
+.gantt-content:first-child {
+  flex: 0 0 auto; /* Header section should only take needed space */
+}
+
+.gantt-content:last-child {
+  flex: 1; /* Chart section takes remaining space */
+}
+
+.tasks-list-header {
+  width: 200px;
+  min-width: 150px;
+  border: 1px solid #444;
+  border-left: none;
+  border-bottom: none;
+  background-color: #f9f9f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tasks-list-placeholder {
+  font-weight: bold;
+  color: #666;
+  text-align: center;
+  padding: 8px;
+}
+
+.divider-horizontal {
+  height: 8px;
+  background: #ccc;
+  cursor: row-resize;
+  border-top: 1px solid #999;
+  border-bottom: 1px solid #999;
+  position: relative;
+}
+
+.divider-horizontal:hover {
+  background: #bbb;
 }
 
 .timeline-container {
+  flex: 1;
   overflow-x: hidden; /* Changed to hidden since we're controlling it via JS */
   margin-bottom: 10px;
   border: 1px solid #ccc;
+  border-left: none;
   border-bottom: none;
   /* Hide scrollbar but keep functionality */
   -ms-overflow-style: none;  /* IE and Edge */
@@ -36,12 +77,17 @@ body {
   grid-template-columns: repeat(666, 20px);
   min-width: calc(20px * 666); /* Width based on total number of days */
   position: relative;
+  height: 25px; /* Fixed height to match header */
 }
 
 .timeline div {
   border-right: 1px solid #ccc;
   font-size: 10px;
   text-align: center;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .tasks-list {
@@ -110,7 +156,16 @@ body {
       transparent 19px,
       #ddd 19px,
       #ddd 20px
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 39px,  /* 40px - 1px for border */
+      #eee 39px,
+      #eee 40px
     );
+  background-size: 20px 40px; /* Match day width and task row height */
+  background-position: 0 0;
 }
 
 .controls {

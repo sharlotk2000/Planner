@@ -7,6 +7,7 @@ const addTaskBtn = document.getElementById("addTaskBtn");
 const taskNameInput = document.getElementById("taskNameInput");
 const tasksList = document.getElementById("tasksList");
 const divider = document.getElementById("divider");
+const dividerTop = document.getElementById("dividerTop");
 
 const contextMenu = document.getElementById("contextMenu");
 const deleteTaskBtn = document.getElementById("deleteTask");
@@ -57,7 +58,7 @@ function setupDivider() {
   document.addEventListener('mousemove', function(e) {
     if (!isResizing) return;
     
-    const ganttContent = document.querySelector('.gantt-content');
+    const ganttContent = document.querySelector('.gantt-content:last-child');
     const tasksListEl = document.getElementById('tasksList');
     
     // Calculate new width for the tasks list based on the mouse position relative to the gantt content
@@ -65,6 +66,34 @@ function setupDivider() {
     const newWidth = Math.max(150, Math.min(400, e.clientX - contentRect.left));
     
     tasksListEl.style.width = newWidth + 'px';
+  });
+  
+  document.addEventListener('mouseup', function() {
+    isResizing = false;
+    document.body.style.cursor = '';
+  });
+}
+
+function setupTopDivider() {
+  let isResizing = false;
+  
+  dividerTop.addEventListener('mousedown', function(e) {
+    isResizing = true;
+    document.body.style.cursor = 'row-resize';
+    e.preventDefault();
+  });
+  
+  document.addEventListener('mousemove', function(e) {
+    if (!isResizing) return;
+    
+    const ganttContainer = document.querySelector('.gantt-container');
+    const headerContent = document.querySelector('.gantt-content:first-child');
+    
+    // Calculate new height for the header section based on the mouse position relative to the container
+    const containerRect = ganttContainer.getBoundingClientRect();
+    const newHeight = Math.max(30, Math.min(100, e.clientY - containerRect.top));
+    
+    headerContent.style.height = newHeight + 'px';
   });
   
   document.addEventListener('mouseup', function() {
@@ -573,6 +602,7 @@ taskNameInput.addEventListener('keydown', e => {
 /* ---------- Boot ---------- */
 
 setupDivider();
+setupTopDivider();
 initTimeline();
 render();
 taskNameInput.focus();
