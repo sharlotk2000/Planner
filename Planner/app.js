@@ -58,14 +58,18 @@ function setupDivider() {
   document.addEventListener('mousemove', function(e) {
     if (!isResizing) return;
     
-    const ganttContent = document.querySelector('.gantt-content:last-child');
+    const mainContent = document.querySelector('.main-content');
     const tasksListEl = document.getElementById('tasksList');
     
-    // Calculate new width for the tasks list based on the mouse position relative to the gantt content
-    const contentRect = ganttContent.getBoundingClientRect();
+    // Calculate new width for the tasks list based on the mouse position relative to the main content
+    const contentRect = mainContent.getBoundingClientRect();
     const newWidth = Math.max(150, Math.min(400, e.clientX - contentRect.left));
     
     tasksListEl.style.width = newWidth + 'px';
+    
+    // Also update the tasks list header width to match
+    const tasksHeader = document.querySelector('.tasks-list-header');
+    tasksHeader.style.width = newWidth + 'px';
   });
   
   document.addEventListener('mouseup', function() {
@@ -87,13 +91,13 @@ function setupTopDivider() {
     if (!isResizing) return;
     
     const ganttContainer = document.querySelector('.gantt-container');
-    const headerContent = document.querySelector('.gantt-content:first-child');
+    const headerRow = document.querySelector('.header-row');
     
     // Calculate new height for the header section based on the mouse position relative to the container
     const containerRect = ganttContainer.getBoundingClientRect();
     const newHeight = Math.max(30, Math.min(100, e.clientY - containerRect.top));
     
-    headerContent.style.height = newHeight + 'px';
+    headerRow.style.height = newHeight + 'px';
   });
   
   document.addEventListener('mouseup', function() {
@@ -187,6 +191,14 @@ function render() {
   
   // Update chart height to accommodate all tasks
   chart.style.height = Math.max(400, tasks.length * 40) + "px";
+  
+  // Ensure tasks list header matches the width of the tasks list
+  const tasksListEl = document.getElementById('tasksList');
+  const tasksHeader = document.querySelector('.tasks-list-header');
+  if (tasksListEl && tasksHeader) {
+    const computedStyle = window.getComputedStyle(tasksListEl);
+    tasksHeader.style.width = computedStyle.width;
+  }
 }
 
 /* ---------- Actions ---------- */
