@@ -4,10 +4,17 @@ body {
   user-select: none;
 }
 
+.timeline-container {
+  overflow-x: auto;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-bottom: none;
+}
+
 .timeline {
   display: grid;
   grid-template-columns: repeat(666, 20px);
-  margin-bottom: 10px;
+  min-width: 100%;
 }
 
 .timeline div {
@@ -16,11 +23,18 @@ body {
   text-align: center;
 }
 
+.chart-container {
+  overflow-x: auto;
+  overflow-y: auto;
+  height: 400px;
+  border: 1px solid #444;
+  margin-bottom: 10px;
+}
+
 #chart {
   position: relative;
-  border: 1px solid #444;
-  height: 300px;
-  margin-bottom: 10px;
+  min-height: 100%;
+  min-width: 100%;
   background-image: 
     repeating-linear-gradient(
       to right,

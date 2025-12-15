@@ -1,5 +1,5 @@
 const DAY_WIDTH = 20;
-const DAYS_TOTAL = 365;
+const DAYS_TOTAL = 666;
 
 const chart = document.getElementById("chart");
 const timeline = document.getElementById("timeline");
@@ -75,14 +75,18 @@ function render() {
     }
 
     el.style.left = task.start * DAY_WIDTH + "px";
-    el.style.top = index * 40 + "px";
+    el.style.top = index * 40 + "px";  // Keep the same positioning logic
     el.style.width = task.duration * DAY_WIDTH + "px";
+    el.style.position = "absolute";  // Ensure position is absolute
 
     enableInteractions(el, index);
     enableContextMenu(el, index);
 
     chart.appendChild(el);
   });
+  
+  // Update chart height to accommodate all tasks
+  chart.style.height = Math.max(400, tasks.length * 40) + "px";
 }
 
 /* ---------- Actions ---------- */
