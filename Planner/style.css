@@ -4,17 +4,29 @@ body {
   user-select: none;
 }
 
+.gantt-container {
+  position: relative;
+}
+
 .timeline-container {
-  overflow-x: auto;
+  overflow-x: hidden; /* Changed to hidden since we're controlling it via JS */
   margin-bottom: 10px;
   border: 1px solid #ccc;
   border-bottom: none;
+  /* Hide scrollbar but keep functionality */
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.timeline-container::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari, Opera*/
 }
 
 .timeline {
   display: grid;
   grid-template-columns: repeat(666, 20px);
   min-width: 100%;
+  position: relative;
 }
 
 .timeline div {
@@ -24,7 +36,7 @@ body {
 }
 
 .chart-container {
-  overflow-x: auto;
+  overflow-x: auto; /* Changed back to auto to show scrollbar */
   overflow-y: auto;
   height: 400px;
   border: 1px solid #444;
