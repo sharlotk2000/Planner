@@ -423,6 +423,22 @@ taskNameInput.addEventListener("keydown", e => {
   if (e.key === "Enter") addTask();
 });
 
+/* ---------- Scroll Synchronization ---------- */
+
+// Get the containers
+const timelineContainer = document.querySelector(".timeline-container");
+const chartContainer = document.querySelector(".chart-container");
+
+// Sync timeline scroll to chart container
+timelineContainer.addEventListener("scroll", () => {
+  chartContainer.scrollLeft = timelineContainer.scrollLeft;
+});
+
+// Sync chart container scroll to timeline
+chartContainer.addEventListener("scroll", () => {
+  timelineContainer.scrollLeft = chartContainer.scrollLeft;
+});
+
 /* ---------- Boot ---------- */
 
 initTimeline();
