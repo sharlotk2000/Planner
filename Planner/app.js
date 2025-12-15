@@ -78,34 +78,6 @@ function setupDivider() {
   });
 }
 
-function setupTopDivider() {
-  let isResizing = false;
-  
-  dividerTop.addEventListener('mousedown', function(e) {
-    isResizing = true;
-    document.body.style.cursor = 'row-resize';
-    e.preventDefault();
-  });
-  
-  document.addEventListener('mousemove', function(e) {
-    if (!isResizing) return;
-    
-    const ganttContainer = document.querySelector('.gantt-container');
-    const headerRow = document.querySelector('.header-row');
-    
-    // Calculate new height for the header section based on the mouse position relative to the container
-    const containerRect = ganttContainer.getBoundingClientRect();
-    const newHeight = Math.max(30, Math.min(100, e.clientY - containerRect.top));
-    
-    headerRow.style.height = newHeight + 'px';
-  });
-  
-  document.addEventListener('mouseup', function() {
-    isResizing = false;
-    document.body.style.cursor = '';
-  });
-}
-
 /* ---------- Selection ---------- */
 
 function selectTask(index) {
@@ -190,7 +162,14 @@ function render() {
   });
   
   // Update chart height to accommodate all tasks
-  chart.style.height = Math.max(400, tasks.length * 40) + "px";
+  const chartHeight = Math.max(400, tasks.length * 40);
+  chart.style.height = chartHeight + "px";
+  
+  // Update the timeline container to match the chart height
+  const timelineContainer = document.querySelector('.timeline-container');
+  if (timelineContainer) {
+    timelineContainer.style.height = '25px';  // Fixed height for timeline
+  }
   
   // Ensure tasks list header matches the width of the tasks list
   const tasksListEl = document.getElementById('tasksList');
@@ -614,7 +593,6 @@ taskNameInput.addEventListener('keydown', e => {
 /* ---------- Boot ---------- */
 
 setupDivider();
-setupTopDivider();
 initTimeline();
 render();
 taskNameInput.focus();

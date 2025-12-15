@@ -9,6 +9,7 @@ body {
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-height: 400px; /* Ensure minimum height */
 }
 
 .header-row {
@@ -43,32 +44,15 @@ body {
   padding: 8px;
 }
 
-.divider-horizontal {
-  height: 8px;
-  background: #ccc;
-  cursor: row-resize;
-  border-top: 1px solid #999;
-  border-bottom: 1px solid #999;
-  position: relative;
-}
-
-.divider-horizontal:hover {
-  background: #bbb;
-}
-
+/* Remove the horizontal divider since we don't want draggable headers */
 .timeline-container {
   flex: 1;
-  overflow-x: hidden; /* Changed to hidden since we're controlling it via JS */
+  overflow-x: auto; /* Show scrollbar */
   border: 1px solid #ccc;
   border-left: none;
   border-bottom: none;
-  /* Hide scrollbar but keep functionality */
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
-}
-
-.timeline-container::-webkit-scrollbar {
-  display: none;  /* Chrome, Safari, Opera*/
+  /* Make sure it stays within container */
+  max-width: 100%;
 }
 
 .timeline {
@@ -100,6 +84,7 @@ body {
   display: flex;
   flex-direction: column;
   flex: none; /* Don't grow/shrink */
+  height: calc(100% - 25px); /* Account for the timeline header height */
 }
 
 .task-item {
@@ -143,6 +128,7 @@ body {
   border-left: none;
   margin-bottom: 10px;
   min-width: 300px;
+  height: calc(100% - 25px); /* Account for the timeline header height */
 }
 
 #chart {
