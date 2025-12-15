@@ -6,6 +6,15 @@ body {
 
 .gantt-container {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.gantt-content {
+  display: flex;
+  flex: 1;
+  min-height: 400px;
 }
 
 .timeline-container {
@@ -35,12 +44,59 @@ body {
   text-align: center;
 }
 
+.tasks-list {
+  width: 200px;
+  min-width: 150px;
+  border: 1px solid #444;
+  border-left: none;
+  border-bottom: none;
+  overflow-y: auto;
+  background-color: #f9f9f9;
+  display: flex;
+  flex-direction: column;
+}
+
+.task-item {
+  padding: 8px 12px;
+  border-bottom: 1px solid #ddd;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  height: 40px;
+  display: flex;
+  align-items: center;
+}
+
+.task-item:hover {
+  background-color: #e9e9e9;
+}
+
+.task-item.selected {
+  background-color: #d0e0ff;
+}
+
+.divider {
+  width: 8px;
+  background: #ccc;
+  cursor: col-resize;
+  border-left: 1px solid #999;
+  border-right: 1px solid #999;
+  position: relative;
+}
+
+.divider:hover {
+  background: #bbb;
+}
+
 .chart-container {
+  flex: 1;
   overflow-x: auto; /* Changed back to auto to show scrollbar */
   overflow-y: auto;
-  height: 400px;
   border: 1px solid #444;
+  border-left: none;
   margin-bottom: 10px;
+  min-width: 300px;
 }
 
 #chart {
